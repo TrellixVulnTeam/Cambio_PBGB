@@ -1,6 +1,10 @@
 from Deck import Deck
 from Hand import Hand
-from Card import Card
+"""
+This is a library with functions needed to control the card game
+Creating a card (Tuple type) and every handling of cards between
+hands or decks is done with those functions
+"""
 
 
 def deck_to_hand(deck, hand):
@@ -52,3 +56,26 @@ def stick(hand, index, deck):
         hand_to_deck(hand, index, deck)
         return True
     return False
+
+
+# ---------------------------------------------------------------- !Card!
+def new_card(number, shape, color):
+    """Creates a new Tuple that represents a card
+    :returns - (Number, Shape, Color)
+    """
+    return number, shape, color
+
+
+def get_number(card):
+    """Returns the number value of the card [0]"""
+    return card[0]
+
+
+def get_shape(card):
+    """Returns the shape value of the card [1]"""
+    return card[1]
+
+
+def get_color(card):
+    """Returns the color value of the card [2]"""
+    return card[2]

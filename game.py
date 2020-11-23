@@ -1,6 +1,16 @@
 from Actions import Card, Deck, Hand
 import Actions
-import Card2
 
-card2 = Card2.new_card(5, "Hearts", "Red")
-print(Card2.get_color(card2)+5)
+deck = Deck()
+hand = Hand()
+hand2 = Hand()
+deck.shuffle()
+
+Actions.deck_to_hand(deck, hand)
+Actions.deck_to_hand(deck, hand)
+Actions.deck_to_hand(deck, hand)
+Actions.deck_to_hand(deck, hand)
+hand.print_hand()
+
+Actions.hand_to_deck(hand, 0, deck)
+hand.print_hand()

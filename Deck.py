@@ -1,4 +1,4 @@
-from Card import Card
+import Actions
 import random
 
 
@@ -6,14 +6,14 @@ class Deck():
     """Creates a full 54 cards deck Unsorted"""
     def __init__(self):
         self.deck = []
-        self.deck.append(Card(0, "Clover", "Black"))
-        self.deck.append(Card(0, "Hearts", "Red"))
+        self.deck.append(Actions.new_card(0, "Clover", "Black"))
+        self.deck.append(Actions.new_card(0, "Hearts", "Red"))
 
         for i in range(1, 14):  # adds all the cards to the deck
-            self.deck.append(Card(i, "Pickes", "Black"))
-            self.deck.append(Card(i, "Clover", "Black"))
-            self.deck.append(Card(i, "Hearts", "Red"))
-            self.deck.append(Card(i, "Tiles", "Red"))
+            self.deck.append(Actions.new_card(i, "Pickes", "Black"))
+            self.deck.append(Actions.new_card(i, "Clover", "Black"))
+            self.deck.append(Actions.new_card(i, "Hearts", "Red"))
+            self.deck.append(Actions.new_card(i, "Tiles", "Red"))
 
     def size(self):
         """returns how many cards are in the deck (deck's size)"""
@@ -27,17 +27,15 @@ class Deck():
     def take_card(self):
         """returns and remove the card that in the top of the deck"""
         if self.size() > 0:
-            temp_card = self.deck[-1]
-            self.deck.pop(-1)
-            return temp_card
+            return self.deck.pop(-1)
 
     def add_card(self, card):
-        """gets a card and adds it to the top of the deck"""
+        """gets a card (tuple) and adds it to the top of the deck"""
         self.deck.append(card)
 
-    def shuffle(self):
-        """shuffles randomly all the cards in the deck"""
-        shuffle_times = 100  # the number of times all the cards switch random places
+    def shuffle(self, shuffle_times=25):
+        """shuffles randomly all the cards in the deck, shuffle_times
+         is the number of times all the cards switch random places"""
         for j in range(shuffle_times):
             for i in range(len(self.deck)):
                 temp_card = self.deck.pop(i)
@@ -51,4 +49,6 @@ class Deck():
     def print_deck(self):
         """prints all the cards in the deck by order"""
         for card in self.deck:
-            card.print_card()
+            print(card)
+
+

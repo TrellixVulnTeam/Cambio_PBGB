@@ -1,7 +1,5 @@
-from Card import Card
-from Deck import Deck
-from Card import Card
 import Actions
+
 
 class Hand:
     def __init__(self):
@@ -13,14 +11,14 @@ class Hand:
 
     def cards_mum(self):
         """return the number of cards in the hand *without null places*"""
-        count = 0       # counter for the cards
+        count = 0  # counter for the cards
         for card in self.hand:
             if card is not None:
                 count += 1
         return count
 
     def add_card(self, card):
-        """adds a card to the hand #Not specific place#"""
+        """adds a card (Tuple) to the hand #Not specific place#"""
         for i in range(self.size()):  # checks if there is an empty card spot in the list
             if self.hand[i] is None:
                 self.hand[i] = card
@@ -28,11 +26,11 @@ class Hand:
         self.hand.append(card)
 
     def set_card(self, card, index):
-        """adds a card to the hand to a specific index"""
+        """adds a card (Tuple) to the hand to a specific index"""
         self.hand[index] = card
 
     def get_card(self, index):
-        """returns the card that is in the top of the deck without removing it"""
+        """returns the card (Tuple) that is in the top of the deck without removing it"""
         if self.size() > 0:
             return self.hand[index]
 
@@ -42,14 +40,13 @@ class Hand:
             temp_card = self.hand[index]
             self.hand[index] = None
             return temp_card
-        False
 
     def get_hand_sum(self):
         """returns the sum of all the numbers in the hand"""
-        sum_nums = 0     # saves the sum of the card's numbers
+        sum_nums = 0  # saves the sum of the card's numbers
         for card in self.hand:
             if card is not None:
-                sum_nums += card.get_number()
+                sum_nums += Actions.get_number(card)
         return sum_nums
 
     def print_hand(self):
@@ -57,7 +54,7 @@ class Hand:
         print("Hand:")
         for card in self.hand:
             if card is not None:
-                card.print_card()
+                print(card)
             else:
                 print("None!")
         print("*********************")
