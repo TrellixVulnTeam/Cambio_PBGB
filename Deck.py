@@ -10,7 +10,7 @@ class Deck():
         self.deck.append(Actions.new_card(0, "Hearts", "Red"))
 
         for i in range(1, 14):  # adds all the cards to the deck
-            self.deck.append(Actions.new_card(i, "Pickes", "Black"))
+            self.deck.append(Actions.new_card(i, "Pikes", "Black"))
             self.deck.append(Actions.new_card(i, "Clover", "Black"))
             self.deck.append(Actions.new_card(i, "Hearts", "Red"))
             self.deck.append(Actions.new_card(i, "Tiles", "Red"))
@@ -51,4 +51,14 @@ class Deck():
         for card in self.deck:
             print(card)
 
+    def sort_deck_by_num(self):
+        """Sorts the cards in the deck by numbers values"""
+        self.deck = sorted(self.deck, key=lambda x: x[0])
 
+    def sort_deck_by_shape(self):
+        """Sorts the cards in the deck by shape values"""
+        self.deck = sorted(self.deck, key=lambda x: x[1])
+
+    def sort_deck_by_color(self):
+        """Sorts the cards in the deck by color values"""
+        self.deck = sorted(self.deck, key=lambda x: x[2])

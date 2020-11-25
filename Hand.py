@@ -6,11 +6,11 @@ class Hand:
         self.hand = []
 
     def size(self):
-        """returns the size of the hand list *including null places*"""
+        """ Returns the size of the hand list *including null places*"""
         return len(self.hand)
 
     def cards_mum(self):
-        """return the number of cards in the hand *without null places*"""
+        """ Return the number of cards in the hand *without null places*"""
         count = 0  # counter for the cards
         for card in self.hand:
             if card is not None:
@@ -18,31 +18,32 @@ class Hand:
         return count
 
     def add_card(self, card):
-        """adds a card (Tuple) to the hand #Not specific place#"""
-        for i in range(self.size()):  # checks if there is an empty card spot in the list
+        """ Adds a card (Tuple) to the hand #to first null spot or to the end#"""
+        for i in range(self.size()):  # checks if there is an empty card spot in the list - if yes than put card there
             if self.hand[i] is None:
                 self.hand[i] = card
                 return True
         self.hand.append(card)
+        return False
 
     def set_card(self, card, index):
-        """adds a card (Tuple) to the hand to a specific index"""
+        """ Replaces a card (Tuple in the hand in a specific index"""
         self.hand[index] = card
 
     def get_card(self, index):
-        """returns the card (Tuple) that is in the top of the deck without removing it"""
+        """ Returns the card (Tuple) that is in the top of the deck without removing it"""
         if self.size() > 0:
             return self.hand[index]
 
     def take_card(self, index):
-        """returns and remove the card that in end of the"""
+        """ Returns and remove the card that in end of the"""
         if self.size() > 0:
             temp_card = self.hand[index]
             self.hand[index] = None
             return temp_card
 
     def get_hand_sum(self):
-        """returns the sum of all the numbers in the hand"""
+        """ Returns the sum of all the numbers in the hand"""
         sum_nums = 0  # saves the sum of the card's numbers
         for card in self.hand:
             if card is not None:
@@ -50,7 +51,7 @@ class Hand:
         return sum_nums
 
     def print_hand(self):
-        """prints the hand (with null slots)"""
+        """ Prints the hand (with null slots)"""
         print("Hand:")
         for card in self.hand:
             if card is not None:
@@ -58,3 +59,24 @@ class Hand:
             else:
                 print("None!")
         print("*********************")
+
+
+
+# Extra functions, no need for Cambio game
+
+
+    def sort_hand_by_num(self):
+        """Sorts the cards in the hand by numbers values"""
+        self.hand = sorted(self.hand, key=lambda x: x[0])
+
+    def sort_hand_by_shape(self):
+        """Sorts the cards in the hand by shape values"""
+        self.hand = sorted(self.hand, key=lambda x: x[1])
+
+    def sort_hand_by_color(self):
+        """Sorts the cards in the hand by color values"""
+        self.hand = sorted(self.hand, key=lambda x: x[2])
+
+    def del_nones(self):
+        """Deletes all the 'Nones' in the hand"""
+        self.hand = filter(lambda a: a is not None, self.hand)
