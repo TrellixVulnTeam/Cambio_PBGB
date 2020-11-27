@@ -6,5 +6,7 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module" module-name="playGround" />
+    <orderEntry type="module" module-name="flappy_bird-main" />
   </component>
 </module>

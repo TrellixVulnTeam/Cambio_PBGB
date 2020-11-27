@@ -2,12 +2,16 @@ import Actions
 
 
 class Hand:
-    def __init__(self):
+    def __init__(self, user_name="user"):
         self.hand = []
+        self.user_name = user_name
 
     def size(self):
         """ Returns the size of the hand list *including null places*"""
         return len(self.hand)
+
+    def get_user_name(self):
+        return self.user_name
 
     def cards_mum(self):
         """ Return the number of cards in the hand *without null places*"""
