@@ -59,7 +59,7 @@ class Hand:
         print("Hand:")
         for card in self.hand:
             if card is not None:
-                print(card)
+                card.print_card()
             else:
                 print("None!")
         print("*********************")

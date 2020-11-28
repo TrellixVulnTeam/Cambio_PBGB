@@ -1,5 +1,3 @@
-from Deck import Deck
-from Hand import Hand
 
 """
 This is a library with functions needed to control the card game
@@ -98,51 +96,3 @@ def is_same_color(card1, card2):
 
 def is_same_card(card1, card2):
     return is_same_number(card1, card2) and is_same_shape(card1, card2) and is_same_color(card1, card2)
-
-
-class Card:
-    """Creates a new Tuple that represents a card
-     :returns - (Number, Shape, Color)
-     """
-
-    def __init__(self, number, shape, color, pos=(0, 0)):
-        self.card = (number, shape, color)
-        self.pos = pos
-
-    def get_number(self):
-        """Returns the number value of the card [0]"""
-        return self.card[0]
-
-    def get_shape(self):
-        """Returns the shape value of the card [1]"""
-        return self.card[1]
-
-    def get_color(self):
-        """Returns the color value of the card [2]"""
-        return self.card[2]
-
-    def get_pos(self):
-        """Returns the location of the card as tuple (x, y)"""
-        return self.pos
-
-    def set_pos(self, pos):
-        """Gets a new position and sets the card pos to this"""
-        self.pos = pos
-
-    def is_same_number(self, card2):
-        """ Gets 2 cards and return true if they have the same number value or false if not """
-        return self.card1[0] == card2[0].get_number()
-
-    def is_same_shape(self, card2):
-        """ Gets 2 cards and return true if they have the same shape value or false if not """
-        return self.card1[1].__eq__(card2[1].get_shape())
-
-    def is_same_color(self, card2):
-        """ Gets 2 cards and return true if they have the same color value or false if not """
-        return self.card1[2].__eq__(card2[2].get_color())
-
-    def is_same_card(self, card2):
-        return is_same_number(self.card, card2) and is_same_shape(self.card, card2) and is_same_color(self.card, card2)
-
-    def print_card(self):
-        print(self.card)

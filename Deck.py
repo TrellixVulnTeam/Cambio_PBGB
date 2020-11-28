@@ -1,4 +1,4 @@
-import Actions
+from Card import Card
 import random
 
 
@@ -6,23 +6,22 @@ class Deck():
     """Creates a full 54 cards deck Unsorted"""
     def __init__(self):
         self.deck = []
-        self.deck.append(Actions.new_card(0, "Clover", "Black"))
-        self.deck.append(Actions.new_card(0, "Hearts", "Red"))
+        self.deck.append(Card(0, "Clover", "Black"))
+        self.deck.append(Card(0, "Hearts", "Red"))
 
         for i in range(1, 14):  # adds all the cards to the deck
-            self.deck.append(Actions.new_card(i, "Pikes", "Black"))
-            self.deck.append(Actions.new_card(i, "Clover", "Black"))
-            self.deck.append(Actions.new_card(i, "Hearts", "Red"))
-            self.deck.append(Actions.new_card(i, "Tiles", "Red"))
+            self.deck.append(Card(i, "Pikes", "Black"))
+            self.deck.append(Card(i, "Clover", "Black"))
+            self.deck.append(Card(i, "Hearts", "Red"))
+            self.deck.append(Card(i, "Tiles", "Red"))
 
     def size(self):
         """returns how many cards are in the deck (deck's size)"""
         return len(self.deck)
 
-    def get_card(self):
+    def get_card(self, index=-1):
         """returns the card that is in the top of the deck without removing it"""
-        if self.size() > 0:
-            return self.deck[-1]
+        return self.deck[index]
 
     def take_card(self):
         """returns and remove the card that in the top of the deck"""
@@ -49,7 +48,7 @@ class Deck():
     def print_deck(self):
         """prints all the cards in the deck by order"""
         for card in self.deck:
-            print(card)
+            card.print_card()
 
     def sort_deck_by_num(self):
         """Sorts the cards in the deck by numbers values"""
