@@ -48,19 +48,29 @@ class Card:
     def is_card_location_pressedXXX(self, positions):
         """ Returns True if the location in inside the card """
         x1, y1 = self.pos[0] - 37, self.pos[1] - 53
-        x2, y2 = positions[0] , positions[1]
+        x2, y2 = positions[0], positions[1]
         if x1 <= x2 <= x1 + 75 and y2 >= y1 and y2 <= y1 + 107:
             return True
         return False
 
+    def is_pressed(self, pos):
+        x1 = pos[0]
+        y1 = pos[1]
+        x2 = self.pos[0]
+        y2 = self.pos[1]
+        if x2 <= x1 <= x2 + self.width and y2 <= y1 <= y2 + self.height:
+            return True
+        else:
+            return False
+
     def is_card_location_pressed(self, positions):
         """ Returns True if the location in inside the card """
         x1, y1 = self.pos[0], self.pos[1]
-        x2, y2 = positions[0] , positions[1]
-        if x2 >= x1 and x2 <= x1 + 75 and y2 >= y1 and y2 <= y1 + 107:
+        x2, y2 = positions[0], positions[1]
+        if x1 <= x2 <= x1 + 75 and y1 <= y2 <= y1 + 107:
             return True
         return False
 
     def __str__(self):
-        #return str(self.card[0]) + self.card[1] + self.card[2]
+        # return str(self.card[0]) + self.card[1] + self.card[2]
         return str(self.card)

@@ -4,16 +4,19 @@ import random
 
 class Deck():
     """Creates a full 54 cards deck Unsorted"""
-    def __init__(self):
-        self.deck = []
-        self.deck.append(Card(0, "Clover", "Black"))
-        self.deck.append(Card(0, "Hearts", "Red"))
+    def __init__(self, status=1):
+        if status == 1:
+            self.deck = []
+            self.deck.append(Card(0, "Clover", "Black"))
+            self.deck.append(Card(0, "Hearts", "Red"))
 
-        for i in range(1, 14):  # adds all the cards to the deck
-            self.deck.append(Card(i, "Pikes", "Black"))
-            self.deck.append(Card(i, "Clover", "Black"))
-            self.deck.append(Card(i, "Hearts", "Red"))
-            self.deck.append(Card(i, "Tiles", "Red"))
+            for i in range(1, 14):  # adds all the cards to the deck
+                self.deck.append(Card(i, "Pikes", "Black"))
+                self.deck.append(Card(i, "Clover", "Black"))
+                self.deck.append(Card(i, "Hearts", "Red"))
+                self.deck.append(Card(i, "Tiles", "Red"))
+        elif status == 0:
+            self.deck = []
 
     def size(self):
         """returns how many cards are in the deck (deck's size)"""
