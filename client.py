@@ -8,25 +8,36 @@ n = Network()
 n.connect()
 my_id = int(n.get_player())  # Player's ID
 
-def send_action(data):
-    n.send(data)
-    time.sleep(0.05)
 
 def data_deck_to_hand(card_index):
     """ player_ID, action, card_index """
     global my_id
-    code = "deck_to_hand" + ',' + str(my_id) + ',' + str(card_index)
-    return str(code)
+    code = "deck_to_hand" + ',' + str(my_id) + ',' + str(card_index) + ',' + '-1' + ',' + '-1'
+    return code
 
 
 def data_dump_to_hand(card_index):
     """ action, player_ID, card_index """
     global my_id
-    code = "dump_to_hand" + ',' + str(my_id) + ',' + str(card_index)
-    return str(code)
+    code = "dump_to_hand" + ',' + str(my_id) + ',' + str(card_index) + ',' + '-1' + ',' + '-1'
+    return code
 
-#game = n.send("deal")
+
+def data_switch_cards(card1_index, hand2_id, card2_index):
+    """ action, player_ID, card_index, player2_ID, card2_index """
+    global my_id
+    code = "switch_cards" + ',' + str(my_id) + ',' + str(card1_index) +',' + str(hand2_id) + ',' + str(card2_index)
+    return code
+
+game = n.send("deal")
 
 while True:
     x = input("Enter: ")
-    game = n.send(x)
+    if x == "dump":
+        game = n.send(data_dump_to_hand(0))
+    elif x == "deck":
+        game = n.send(data_deck_to_hand(0))
+    elif x == "S":
+        game = n.send(data_switch_cards(0, 2, 0))
+    else:
+        game = n.send(x)

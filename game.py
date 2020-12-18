@@ -120,12 +120,15 @@ class Game:
         if self.players[from_player_id - 1].size() > 0:
             self.players[to_player_id - 1].add_card(self.players[from_player_id - 1].take_card(card_index))
 
-    def switch_cards(self, player_id1, card_index1, player_id2, card_index2):
-        """gets to hands and switch between two cards"""
-        card1 = self.players[player_id1 - 1].take_card(card_index1)
-        card2 = self.players[player_id2 - 1].take_card(card_index2)
-        self.players[player_id1 - 1].set_card(card2, card_index1)
-        self.players[player_id2 - 1].set_card(card1, card_index2)
+    def switch_cards(self, player1_id, card1_index, player2_id, card2_index):
+        """ Switch between 2 cards in 2 hands """
+        hand1 = self.players[player1_id - 1]
+        hand2 = self.players[player2_id - 1]
+        temp_card1 = hand1.take_card(card1_index)
+        temp_card2 = hand2.take_card(card2_index)
+        hand1.add_card(temp_card2, card1_index)
+        hand2.add_card(temp_card1, card2_index)
+
 
     def peek(self, player_id, card_index):
         """peeks (looks) a card in hand"""

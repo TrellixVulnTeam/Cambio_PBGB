@@ -1,5 +1,6 @@
 import socket
 from _thread import *
+import threading
 import pickle
 from game import *
 
@@ -11,29 +12,27 @@ def take_action(user_data, game):
     code = user_data.split(',')     # [action, player_ID, card_index]
     action = code[0]
     if len(code) > 1:
-        p_id, card_index = int(code[1]), int(code[2])
+        p_id, card_index, p2_id, card2_index = int(code[1]), int(code[2]), int(code[3]), int(code[4])
 
     # deal 4 cards to each player
     if action == "deal":
         game.start_deal()
-
 
     # player finished turn
     if action == "Next_Turn":
         game.next_turn()
         print("Turn: ", game.get_turn())
 
-    # player take card from game deck and throw one from hand to dump
-    if action == "deck_to_hand":
-        game.deck_to_hand("gameDeck", player_id)
-        game.hand_to_dump(p_id, int(code[2]))
-
     # player take card from dump and throw one from hand to dump
     if action == "dump_to_hand":
-        game.dump_switch(int(p_id, card_index))
+        game.dump_switch(p_id, card_index)
 
+    # player take card from game deck and throw one from hand to dump
     if action == "deck_to_hand":
         game.deck_to_hand(p_id, 1, card_index)
+
+    if action == "switch_cards":
+        game.switch_cards(p_id, card_index, p2_id, card2_index)
 
     conn.sendall(pickle.dumps(game))
 
@@ -110,7 +109,6 @@ def threaded_client2(conn, player_id, gameId):
     except:
         pass
     idCount -= 1
-    print(idCount)
     conn.close()
 
 
@@ -159,7 +157,9 @@ while True:
         player_id = 0
         pass
 
-    start_new_thread(threaded_client2, (conn, player_id, gameId))
+    #start_new_thread(threaded_client2, (conn, player_id, gameId))
+    t = threading.Thread(target=threaded_client2, args=(conn, player_id, gameId))
+    t.start()
 
     """ arrange the idCount after client disconnect """
     if len(games) > 0:
