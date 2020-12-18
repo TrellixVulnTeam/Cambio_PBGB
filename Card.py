@@ -49,7 +49,7 @@ class Card:
         """ Returns True if the location in inside the card """
         x1, y1 = self.pos[0] - 37, self.pos[1] - 53
         x2, y2 = positions[0], positions[1]
-        if x1 <= x2 <= x1 + 75 and y2 >= y1 and y2 <= y1 + 107:
+        if x1 <= x2 <= x1 + 75 and y1 <= y2 <= y1 + 107:
             return True
         return False
 
