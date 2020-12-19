@@ -1,14 +1,30 @@
 import socket
-from _thread import *
 import threading
 import pickle
-from game import *
+from game import Game
+import time
 
+SERVER = socket.gethostbyname(socket.gethostname())
+PORT = 5555
+DISCONNECT_MESSAGE = "!DISCONNECT"
+server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+try:
+    server.bind((SERVER, PORT))
+except socket.error as e:
+    print(str(e))
+
+print("Server Started, Waiting for connections...")
+server.listen()
+
+connected = set()
+games = {}
+idCount = 0
+player_id = 1
 
 def take_action(user_data, game):
     """ Reads the data received from the client and do the action according to it """
 
-    print(user_data)
     code = user_data.split(',')     # [action, player_ID, card_index]
     action = code[0]
     if len(code) > 1:
@@ -36,30 +52,23 @@ def take_action(user_data, game):
 
     conn.sendall(pickle.dumps(game))
 
-
-def threaded_client(conn, player_id, gameId):
+def handleClient(conn, p_id, gameId):
     global idCount
-    conn.send(str.encode(str(player_id)))
+    conn.send(str.encode(str(p_id)))
 
     while True:
-        # print("key=",(list(games.keys())[-1]), " id=", idCount, " ,len: ", len(games))
-
         try:
-            data = conn.recv(4096).decode()
+            data = conn.recv(2048).decode()
+            if data != "None":
+                print(f"User {p_id}: {data}")
 
             if gameId in games:
                 game = games[gameId]
 
-                if not data:
-                    print("Not data")
+                if data == DISCONNECT_MESSAGE:
                     break
-                else:
-                    if data == "reset":
-                        game.resetWent()
-                    elif data != "get":
-                        game.play(player_id, data)
 
-                    conn.sendall(pickle.dumps(game))
+                conn.sendall(pickle.dumps(game))
             else:
                 break
         except:
@@ -68,43 +77,7 @@ def threaded_client(conn, player_id, gameId):
     print("Lost connection")
     try:
         del games[gameId]
-        print("Closing Game", gameId)
-    except:
-        pass
-    idCount -= 1
-    conn.close()
-    if len(games) > 0:
-        key = (list(games.keys()))[-1]
-        pnum = len(games[key].players)
-        idCount = ((list(games.keys()))[-1] * 4) + len(games[key].players)
-
-
-def threaded_client2(conn, player_id, gameId):
-    global idCount
-    conn.send(str.encode(str(player_id)))
-
-    while True:
-        try:
-            data = conn.recv(4096).decode()
-
-            if gameId in games:
-                game = games[gameId]
-
-                if not data:
-                    print("Not data")
-                    break
-
-                else:
-                    take_action(data, game)
-
-            else:
-                break
-        except:
-            break
-
-    print("Lost connection")
-    try:
-        # del games[gameId]
+        conn.send(str.encode(DISCONNECT_MESSAGE))
         print("Closing Game", gameId)
     except:
         pass
@@ -112,57 +85,35 @@ def threaded_client2(conn, player_id, gameId):
     conn.close()
 
 
-server = "192.168.239.2"
-port = 5555
-
-socket1 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-try:
-    socket1.bind((server, port))
-except socket.error as e:
-    str(e)
-
-socket1.listen(4)  # unable 4 players in each socket
-print("Server Started, Waiting for connections...")
-
-connected = set()
-games = {}
-idCount = 0
-player_id = 0
-
-# when we connect to a client
 while True:
-    conn, addr = socket1.accept()
+    conn, addr = server.accept()
     print("Connected to:", addr)
 
     idCount += 1
-    gameId = (idCount - 1) // 4  # The 4 is the number of players in each game
+    gameId = (idCount - 1) // 4
 
     if player_id > 4:
         player_id = 1
 
-    # number of players in a game
-    if idCount % 4 == 1:  # The 4 is the number of players
-        games[gameId] = Game(gameId)  # Creates a new Game settings and wait for another player
-        # print("Creating a new game...")
+    # if we have 4 players in game
+    if idCount % 4 == 1:
+        games[gameId] = Game(gameId)
+        print("Creating a new game... waiting for players to join")
 
     elif idCount % 4 == 0:  # Already have 1 player and game settings exist but game has not started
-        games[gameId].ready = True
         print("playing")
 
     try:
         games[gameId].add_player()
         player_id = len(games[gameId].players)
     except:
-        player_id = 0
-        pass
+        print("Error - player_id = len(games[gameId].players")
 
-    #start_new_thread(threaded_client2, (conn, player_id, gameId))
-    t = threading.Thread(target=threaded_client2, args=(conn, player_id, gameId))
-    t.start()
+    thread = threading.Thread(target=handleClient, args=(conn, player_id, gameId))
+    thread.start()
 
     """ arrange the idCount after client disconnect """
     if len(games) > 0:
         key = (list(games.keys()))[-1]
-        pnum = len(games[key].players)
-        idCount = ((list(games.keys()))[-1] * 4) + len(games[key].players)
+        p_num = games[key].players_num()
+        idCount = (key * 4) + p_num

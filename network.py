@@ -6,7 +6,7 @@ from game import Game
 class Network:
     def __init__(self):
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.server = "192.168.239.2"
+        self.server = socket.gethostbyname(socket.gethostname())
         self.port = 5555
         self.addr = (self.server, self.port)
         self.player = self.connect()
@@ -25,7 +25,7 @@ class Network:
     def send(self, data):
         try:
             self.client.send(str.encode(data))
-            return pickle.loads(self.client.recv(4096))
+            return pickle.loads(self.client.recv(2048))
         except socket.error as e:
             print(e)
 
