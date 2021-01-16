@@ -1,6 +1,7 @@
 from network import *
 import threading
 import time
+from game import *
 
 
 def connect():
@@ -14,6 +15,7 @@ def connect():
 
 
 def send(data):
+    global game_flag
     global CLIENT
     global game
     try:
@@ -21,6 +23,7 @@ def send(data):
         game = pickle.loads(CLIENT.recv(2048))
     except socket.error as e:
         print(e)
+        game_flag = False
 
 def send_input():
     global CLIENT
@@ -60,10 +63,10 @@ def data_switch_cards(card1_index, hand2_id, card2_index):
     return code
 
 def main():
-    thread = threading.Thread(target=is_runnig)
-    thread.start()
+    global game
+    send("None")
 
-    print(MY_ID)
+    print(game.players_num())
 
     if game == "dump":
         send(data_dump_to_hand(0))
@@ -78,9 +81,9 @@ CLIENT = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 SERVER = socket.gethostbyname(socket.gethostname())
 PORT = 5555
 ADDR = (SERVER, PORT)
-MY_ID = connect()
+MY_ID = int(connect())
 game_flag = True    # If the game is going on or not
-send("deal")
+game = Game(None)
 
 
 # while all 4 users in the game
@@ -89,4 +92,4 @@ while game_flag:
 # when the game has ended or a player left the game
 if not game_flag:
     print("End of game")
-    time.sleep(5)
+    time.sleep(3)

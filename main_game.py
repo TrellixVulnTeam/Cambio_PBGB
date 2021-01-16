@@ -54,7 +54,7 @@ while run:
         card_img = pygame.image.load('images/cards/back.png')
 
     window.fill((0, 0, 0))
-    window.blit(card_img, (card.get_pos()))
+    window.blit(card_img, card.get_pos())
     pygame.display.update()
 
 pygame.quit()  # Kill Game

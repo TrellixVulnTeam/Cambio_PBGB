@@ -2,7 +2,6 @@ import socket
 import threading
 import pickle
 from game import Game
-import time
 
 SERVER = socket.gethostbyname(socket.gethostname())
 PORT = 5555
@@ -17,7 +16,6 @@ except socket.error as e:
 print("Server Started, Waiting for connections...")
 server.listen()
 
-connected = set()
 games = {}
 idCount = 0
 player_id = 1
@@ -95,24 +93,26 @@ while True:
     if player_id > 4:
         player_id = 1
 
-    # if we have 4 players in game
+    # Already have 1 player and game settings exist but game has not started
     if idCount % 4 == 1:
         games[gameId] = Game(gameId)
         print("Creating a new game... waiting for players to join")
 
-    elif idCount % 4 == 0:  # Already have 1 player and game settings exist but game has not started
+    # if we have 4 players in game
+    elif idCount % 4 == 0:
         print("playing")
+        games[gameId].start_deal()
 
     try:
-        games[gameId].add_player()
         player_id = len(games[gameId].players)
-    except:
-        print("Error - player_id = len(games[gameId].players")
+        games[gameId].add_player(player_id)
+    except Exception as e:
+        print(e)
 
     thread = threading.Thread(target=handleClient, args=(conn, player_id, gameId))
     thread.start()
 
-    """ arrange the idCount after client disconnect """
+    """ arrange the idCount after client disconnect"""
     if len(games) > 0:
         key = (list(games.keys()))[-1]
         p_num = games[key].players_num()

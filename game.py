@@ -13,25 +13,29 @@ class Game:
         self.ready = False  # If the game has started or still waiting for players
         self.turn = 1  # Which player's turn it is
         self.waiting = True  # Are we waiting for a player to do something
-        self.players = []  # The list of the players in current game
+        self.players = {}  # The list/dict of the players in current game
         self.game_deck = Deck(1)  # The game Deck
         self.game_deck.shuffle()
         self.dump_deck = Deck(0)  # The empty deck players dump cards in
 
-    def add_player(self):
+    def add_player(self, player_id):
         """ Gets a new player's hand class and adds it to the players list """
-        self.players.append(Hand())
+        self.players[player_id] = Hand(player_id)
 
     """ Deals every player 4 cards """
 
     def start_deal(self):
+        self.turn = list(self.players.keys())[0]
         for i in range(4):
-            for hand in self.players:
+            for player_id, hand in self.players.items():
                 hand.add_card(self.game_deck.take_card())
 
     def remove_player(self, player_id):
         """ Get's a player index and remove it from the game """
-        self.players[player_id] = None
+        self.players.pop(player_id)
+
+    def get_player(self, player_index):
+        return self.players[player_index]
 
     def get_turn(self):
         """" Returns whos which player's turn it is """
@@ -46,7 +50,7 @@ class Game:
         return self.dump_deck
 
     def get_hand(self, player_id):
-        return self.players[player_id - 1]
+        return self.players[player_id]
 
     def get_id(self):
         return self.id
@@ -55,10 +59,14 @@ class Game:
         return len(self.players)
 
     def next_turn(self):
-        """ Called when player finished turn and updates the next player's turn """
+        active_players = list(self.players.keys())
         self.turn += 1
-        if self.turn > len(self.players):
-            self.turn = 1
+
+        if self.turn not in self.players.keys():
+            self.turn += 1
+
+        if self.turn > active_players[-1]:
+            self.turn = active_players[0]
 
     def play(self, player_id, data):
         """ Updates the game status
@@ -86,7 +94,7 @@ class Game:
 
     def deck_to_hand(self, player_id, num_of_cards, card_index=-1):
         """ takes a card from deck and replace with a card in the hand (card from hand goes to dump)"""
-        hand = self.players[player_id - 1]
+        hand = self.players[player_id]
         if card_index == -1:
             for i in range(num_of_cards):
                 if self.game_deck.size() >= num_of_cards:
@@ -105,25 +113,25 @@ class Game:
 
     def hand_to_dump(self, player_id, card_index):
         """takes a card from the hand and adds it to the dump"""
-        if self.players[player_id - 1].size() > 0:
-            self.dump_deck.add_card(self.players[player_id - 1].take_card(card_index))
+        if self.players[player_id].size() > 0:
+            self.dump_deck.add_card(self.players[player_id].take_card(card_index))
 
     def dump_switch(self, player_id, card_index):
         """ switch a card from the hand with the top card in the dump """
         if self.dump_deck.size() > 0:
             temp_card = self.dump_deck.take_card()
             self.hand_to_dump(player_id, card_index)
-            self.players[player_id - 1].add_card(temp_card, card_index)
+            self.players[player_id ].add_card(temp_card, card_index)
 
     def hand_to_hand(self, from_player_id, card_index, to_player_id):
         """gets to hand and take one card from one hand and adds it to the other"""
-        if self.players[from_player_id - 1].size() > 0:
-            self.players[to_player_id - 1].add_card(self.players[from_player_id - 1].take_card(card_index))
+        if self.players[from_player_id].size() > 0:
+            self.players[to_player_id].add_card(self.players[from_player_id].take_card(card_index))
 
     def switch_cards(self, player1_id, card1_index, player2_id, card2_index):
         """ Switch between 2 cards in 2 hands """
-        hand1 = self.players[player1_id - 1]
-        hand2 = self.players[player2_id - 1]
+        hand1 = self.players[player1_id]
+        hand2 = self.players[player2_id]
         temp_card1 = hand1.take_card(card1_index)
         temp_card2 = hand2.take_card(card2_index)
         hand1.add_card(temp_card2, card1_index)
@@ -132,11 +140,11 @@ class Game:
 
     def peek(self, player_id, card_index):
         """peeks (looks) a card in hand"""
-        return self.players[player_id - 1].get_card(card_index)
+        return self.players[player_id].get_card(card_index)
 
     def stick(self, player_id, card_index):
         """sticks a card in hand to deck, returns true if stick succeed and false if failed"""
-        if (self.players[player_id - 1].get_card(card_index)[0]).is_same_number(self.dump_deck.get_card()[0]):
+        if (self.players[player_id ].get_card(card_index)[0]).is_same_number(self.dump_deck.get_card()[0]):
             self.hand_to_dump(player_id, card_index)
             return True
         return False

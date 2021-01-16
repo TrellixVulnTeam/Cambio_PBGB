@@ -80,12 +80,15 @@ class Hand:
 
     def print_hand(self):
         """ Prints the hand (with null slots)"""
-        print("Hand:")
+        print(f"Hand {self.user_name}:")
         for card in self.hand:
-            if card is not None:
                 card.print_card()
-            else:
-                print("None!")
+
+    def __str__(self):
+        data = ""
+        for card in self.hand:
+            data += str(card) + "\n"
+        return data[0:-1]
 
     # Extra functions, no need for Cambio game
 

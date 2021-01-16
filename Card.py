@@ -72,5 +72,5 @@ class Card:
         return False
 
     def __str__(self):
-        # return str(self.card[0]) + self.card[1] + self.card[2]
-        return str(self.card)
+        text = str(self.card[0]) + " - " + self.card[1] + " - " + self.card[2]
+        return text

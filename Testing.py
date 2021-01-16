@@ -1,120 +1,42 @@
-import socket
-import threading
-import pickle
-from game import Game
-import time
+import pygame
 
-SERVER = socket.gethostbyname(socket.gethostname())
-PORT = 5555
-DISCONNECT_MESSAGE = "!DISCONNECT"
-server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-try:
-    server.bind((SERVER, PORT))
-except socket.error as e:
-    print(str(e))
-
-print("Server Started, Waiting for connections...")
-server.listen()
-
-connected = set()
-games = {}
-idCount = 0
-player_id = 1
-
-def take_action(user_data, game):
-    """ Reads the data received from the client and do the action according to it """
-
-    code = user_data.split(',')     # [action, player_ID, card_index]
-    action = code[0]
-    if len(code) > 1:
-        p_id, card_index, p2_id, card2_index = int(code[1]), int(code[2]), int(code[3]), int(code[4])
-
-    # deal 4 cards to each player
-    if action == "deal":
-        game.start_deal()
-
-    # player finished turn
-    if action == "Next_Turn":
-        game.next_turn()
-        print("Turn: ", game.get_turn())
-
-    # player take card from dump and throw one from hand to dump
-    if action == "dump_to_hand":
-        game.dump_switch(p_id, card_index)
-
-    # player take card from game deck and throw one from hand to dump
-    if action == "deck_to_hand":
-        game.deck_to_hand(p_id, 1, card_index)
-
-    if action == "switch_cards":
-        game.switch_cards(p_id, card_index, p2_id, card2_index)
-
-    conn.sendall(pickle.dumps(game))
-
-def handleClient(conn, p_id, gameId):
-    global idCount
-    conn.send(str.encode(str(p_id)))
-
-    while True:
-        try:
-            data = conn.recv(2048).decode()
-            if data != "None":
-                print(f"User {p_id}: {data}")
-
-            if gameId in games:
-                game = games[gameId]
-
-                if data == DISCONNECT_MESSAGE:
-                    break
-
-                conn.sendall(pickle.dumps(game))
-            else:
-                break
-        except:
-            break
-
-    print("Lost connection")
-    try:
-        del games[gameId]
-        conn.send(str.encode(DISCONNECT_MESSAGE))
-        print("Closing Game", gameId)
-    except:
-        pass
-    idCount -= 1
-    conn.close()
+# Cards
+CARD_WIDTH = 91
+CARD_HEIGHT = 140
+#card_location = (SCREEN_WIDTH/2 - 45, SCREEN_HEIGHT/2 - 70)
+card_location = (0, 0)
 
 
-while True:
-    conn, addr = server.accept()
-    print("Connected to:", addr)
+# Setting up the game window
+pygame.init()
+SCREEN_WIDTH = 1536
+SCREEN_HEIGHT = 864
+window = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+clock = pygame.time.Clock()
 
-    idCount += 1
-    gameId = (idCount - 1) // 4
+pygame.display.set_caption('Cambio - card game')
 
-    if player_id > 4:
-        player_id = 1
+run = True
 
-    # if we have 4 players in game
-    if idCount % 4 == 1:
-        games[gameId] = Game(gameId)
-        print("Creating a new game... waiting for players to join")
 
-    elif idCount % 4 == 0:  # Already have 1 player and game settings exist but game has not started
-        print("playing")
+while run:
+    clock.tick(50)
 
-    try:
-        games[gameId].add_player()
-        player_id = len(games[gameId].players)
-    except:
-        time.sleep(0.5)
-        print("Eror - player_id = len(games[gameId].players")
+    # Searching for quit game
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            run = False
 
-    thread = threading.Thread(target=handleClient, args=(conn, player_id, gameId))
-    thread.start()
+    background = pygame.image.load('images/pics/background.jpg')
+    background = pygame.transform.scale(background, (SCREEN_WIDTH, SCREEN_HEIGHT))
+    card = pygame.image.load('images/pics/red_back2.png')
+    card = pygame.transform.scale(card, (CARD_WIDTH, CARD_HEIGHT))
 
-    """ arrange the idCount after client disconnect """
-    if len(games) > 0:
-        key = (list(games.keys()))[-1]
-        p_num = games[key].players_num()
-        idCount = (key * 4) + p_num
+    window.blit(background, (0, 0))
+    window.blit(card, card_location)
+    pygame.display.update()
+    card_location = (card_location[0] + 10, card_location[1])
+
+
+pygame.quit()
+

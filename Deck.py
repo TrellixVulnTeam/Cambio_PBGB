@@ -64,3 +64,9 @@ class Deck():
     def sort_deck_by_color(self):
         """Sorts the cards in the deck by color values"""
         self.deck = sorted(self.deck, key=lambda x: x[2])
+
+    def __str__(self):
+        data = ""
+        for card in self.deck:
+            data += str(card) + "\n"
+        return data[0:-2]
