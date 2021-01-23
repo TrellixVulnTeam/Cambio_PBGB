@@ -5,9 +5,45 @@ import threading
 from tkinter import messagebox
 
 
+def msg_code(type, action, rival_id=" ", card1_id=" ", card2_id=" "):
+    """
+    return STR code for server that represents what you want to do in the game
+    :type - connect (before game connection actions) / action (In game actions)
+    :action - new / join / random / switch / dump_to_hand / deck_to_hand / switch_cards / deal / next_Turn
+    :return - type|action|rival_id|card1_id|card2_id
+    """
+    return type + '|' + action + '|' + str(rival_id) + '|' + str(card1_id) + '|' + str(card2_id)
+
+
 def start_game():
     """ When admin starts the game - activate the pygame file """
     pass
+
+
+def create_new_room():
+    """ when client asks to create new room """
+    global label1
+    global label2
+    global button
+    global game_status
+    clear_widgets()
+
+    # Create game number
+    my_socket.send("new".encode())
+    data = (my_socket.recv(1024).decode()).split('|')
+    game_code = data[1]
+    game_status = "in game"
+
+    # Show text
+    label1 = Label(window, text="Game code: " + game_code)
+    label2 = Label(window, text=f"{players_num}/4 players are connected")
+
+    button = Button(window, text="Start game!", width=10, height=1, bg="black", fg="white",
+                    command=lambda: start_game())
+    label1.grid(row=0, column=0)
+    label2.grid(row=1, column=0)
+    button.grid(row=2, column=1, pady=20)
+    update_num_of_player("admin")
 
 
 def join_private_room():
@@ -21,12 +57,33 @@ def join_private_room():
     data = (my_socket.recv(1024).decode()).split('|')
 
     messagebox.showinfo(title=None, message=(data[0]))
+    # If no errors
     if data[1] != "Error":
         in_game_menu(data[1])
+        game_status = "in game"
     else:
         game_status = "not in game"
 
     print(data)
+
+
+def join_random_menu():
+    """ asks the server to connect to any room available """
+    # sent to server
+    global game_status
+    code = "random| "
+    my_socket.send(code.encode())
+    data = (my_socket.recv(1024).decode()).split('|')
+
+    # messagebox.showinfo(title=None, message=(data[0]))
+    # If connected successfully
+    if data[1] != "Error":
+        game_status = "in game"
+        in_game_menu(game_code=data[1])
+    # If did not find available rooms
+    else:
+        game_status = "not in game"
+        create_new_room()
 
 
 def in_game_menu(game_code):
@@ -49,35 +106,6 @@ def in_game_menu(game_code):
     label2.grid(row=1, column=0)
     label3.grid(row=2, column=0)
     update_num_of_player()
-
-
-def create_new_room():
-    """ when client asks to create new room """
-    global label1
-    global label2
-    global button
-    global game_status
-
-    game_status = "create room"
-
-    clear_widgets()
-
-    # Create game number
-    my_socket.send("new".encode())
-    data = (my_socket.recv(1024).decode()).split('|')
-    game_code = data[1]
-    game_status = "in game"
-
-    # Show text
-    label1 = Label(window, text="Game code: " + game_code)
-    label2 = Label(window, text=f"{players_num}/4 players are connected")
-
-    button = Button(window, text="Start game!", width=10, height=1, bg="black", fg="white",
-                    command=lambda: start_game())
-    label1.grid(row=0, column=0)
-    label2.grid(row=1, column=0)
-    button.grid(row=2, column=1, pady=20)
-    update_num_of_player("admin")
 
 
 def change_user_name():
@@ -132,23 +160,6 @@ def join_private_menu():
     button.grid(row=2, column=1, pady=20)
 
 
-def join_random_menu():
-    """ asks the server to connect to any room available """
-    # sent to server
-    global game_status
-    code = "random| "
-    my_socket.send(code.encode())
-    data = (my_socket.recv(1024).decode()).split('|')
-
-    messagebox.showinfo(title=None, message=(data[0]))
-    # If connected successfully
-    if data[1] != "Error":
-        game_status = "in game"
-        in_game_menu(game_code=data[1])
-    else:
-        game_status = "not in game"
-
-
 def update_name():
     global USER_NAME
     global input_field
@@ -165,6 +176,7 @@ def update_num_of_player(player_type="user"):
     global game_status
     global players_num
     global label2
+    global button
 
     if game_status == "in game":
         my_socket.send("get_players_num".encode())
@@ -173,6 +185,12 @@ def update_num_of_player(player_type="user"):
         text = f"{players_num}/4 players are connected"
         label2.config(text=text)
         label2.after(500, update_num_of_player)
+
+    if players_num == '1':
+        button = Button(window, text="Start game!", width=10, height=1, bg="black", fg="white",
+                        command=lambda: start_game())
+        button.grid(row=2, column=1, pady=20)
+        label2.config(text=f"{players_num}/4 players are connected")
 
 
 # Server settings
@@ -232,3 +250,5 @@ button.grid(row=2, column=1, pady=20)
 # Starting window
 window.mainloop()
 print("Game ended")
+my_socket.send("Quit".encode())
+my_socket.close()
