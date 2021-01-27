@@ -8,7 +8,7 @@ from tkinter import messagebox
 def msg_code(type, action, rival_id=" ", card1_id=" ", card2_id=" "):
     """
     return STR code for server that represents what you want to do in the game
-    :type - connect (before game connection actions) / action (In game actions)
+    :type - connect (before game connection actions) / action (In game actions) / Quit
     :action - new / join / random / switch / dump_to_hand / deck_to_hand / switch_cards / deal / next_Turn
     :return - type|action|rival_id|card1_id|card2_id
     """

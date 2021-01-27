@@ -1,6 +1,7 @@
 import socket
 import select
 from game_basic import *
+import threading
 import random
 
 
@@ -157,28 +158,28 @@ def handle_client_game_msgs(current_socket, rec_data, temp_key):
 
 def connected_client_server_handle(current_socket):
     try:  # If the client has been disconnected an error will pop
-        rec_data = (current_socket.recv(MAX_MSG_LENGTH).decode()).split('|')
+        data = (current_socket.recv(MAX_MSG_LENGTH).decode()).split('|')
         temp_key = player_in_room(current_socket)  # game_id the player is connected to (False if none)
 
         # If client want to disconnect
-        if rec_data[0] == "Quit":
+        if data[0] == "Quit":
             print("Disconnect client -", current_socket.getpeername())
             handle_logout(current_socket, temp_key)
+            return
 
         # Client sent real massage
         else:
-            handle_client_room_msgs(current_socket, rec_data, temp_key)
-            handle_client_game_msgs(current_socket, rec_data, temp_key)
+            handle_client_room_msgs(current_socket, data, temp_key)
 
     # Client has probably suddenly disconnected
     except Exception as e:
-        print(e)
+        print(e, ": because thread didn't close when socket is")
         temp_key = player_in_room(
             current_socket)  # The game_id which the player is connected to (False if none)
         handle_logout(current_socket, temp_key)
 
 
-def handle_server(server_socket):
+def main(server_socket):
     # Checking if sockets are changed status
     while True:
         ready_to_read, ready_to_write, in_error = select.select([server_socket] + client_sockets, [], [])
@@ -193,11 +194,9 @@ def handle_server(server_socket):
 
             # So it is an already connected client that has sent a massage
             else:
-                connected_client_server_handle(current_socket)
-
-
-
+                thread = threading.Thread(target=connected_client_server_handle, args=(current_socket,))
+                thread.start()
 
 
 socket = create_server()
-handle_server(socket)
+main(socket)
