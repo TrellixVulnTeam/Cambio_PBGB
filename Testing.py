@@ -1,42 +1,83 @@
-import pygame
-
-# Cards
-CARD_WIDTH = 91
-CARD_HEIGHT = 140
-#card_location = (SCREEN_WIDTH/2 - 45, SCREEN_HEIGHT/2 - 70)
-card_location = (0, 0)
+import socket
+from tkinter import *
+import pickle
+from tkinter import messagebox
 
 
-# Setting up the game window
-pygame.init()
-SCREEN_WIDTH = 1536
-SCREEN_HEIGHT = 864
-window = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-clock = pygame.time.Clock()
-
-pygame.display.set_caption('Cambio - card game')
-
-run = True
+def start_game():
+    pass
 
 
-while run:
-    clock.tick(50)
-
-    # Searching for quit game
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            run = False
-
-    background = pygame.image.load('images/pics/background.jpg')
-    background = pygame.transform.scale(background, (SCREEN_WIDTH, SCREEN_HEIGHT))
-    card = pygame.image.load('images/pics/red_back2.png')
-    card = pygame.transform.scale(card, (CARD_WIDTH, CARD_HEIGHT))
-
-    window.blit(background, (0, 0))
-    window.blit(card, card_location)
-    pygame.display.update()
-    card_location = (card_location[0] + 10, card_location[1])
+def get_game():
+    my_socket.send("get_game".encode())
+    game = pickle.loads(my_socket.recv(2048))
+    return game
 
 
-pygame.quit()
+def clear_widgets():
+    widgets = window.grid_slaves()
+    for widget in widgets:
+        widget.destroy()
 
+
+def create_new_room():
+    global game
+    clear_widgets()
+
+    # Create game number
+    my_socket.send("new".encode())
+    data = (my_socket.recv(1024).decode()).split('|')
+    game_code = data[1]
+    game = get_game()
+
+    # Show text
+    label1 = Label(window, text="Game code: " + game_code)
+    label2 = Label(window, text=f"{game.get_players_num()}/4 players are connected")
+
+    button = Button(window, text="Start game!", width=10, height=1, bg="black", fg="white",
+                    command=lambda: start_game())
+    label1.grid(row=0, column=0)
+    label2.grid(row=1, column=0)
+    button.grid(row=2, column=1, pady=20)
+    get_game()
+
+
+def join_private_menu():
+    pass
+
+
+def join_random_menu():
+    pass
+
+
+def change_user_name():
+    pass
+
+
+# Variables
+game_status = "Starting"
+
+# Server settings
+SERVER_IP = "192.168.1.106"
+SERVER_PORT = 4457
+my_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+my_socket.connect((SERVER_IP, SERVER_PORT))
+
+# Window settings
+window = Tk()
+window.title("Cambio game menu")
+window.geometry("300x150")
+window.resizable(True, True)
+window.iconbitmap('C:/Users/Nir/PycharmProjects/playGround/img/icon.ico')
+
+# Menu settings
+my_menu = Menu(window)
+window.config(menu=my_menu)
+menu_game = Menu(my_menu)
+menu_game.add_command(label="New game", command=create_new_room)
+menu_game.add_command(label="Join private game", command=join_private_menu)
+menu_game.add_command(label="Change user name", command=change_user_name)
+menu_game.add_command(label="Quit game", command=window.quit)
+my_menu.add_cascade(label="Game", menu=menu_game)
+
+window.mainloop()

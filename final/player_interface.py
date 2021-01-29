@@ -2,6 +2,7 @@ import socket
 from tkinter import *
 import time
 import threading
+import pickle
 from tkinter import messagebox
 
 
@@ -43,7 +44,7 @@ def create_new_room():
     label1.grid(row=0, column=0)
     label2.grid(row=1, column=0)
     button.grid(row=2, column=1, pady=20)
-    update_num_of_player("admin")
+    get_game()
 
 
 def join_private_room():
@@ -105,7 +106,7 @@ def in_game_menu(game_code):
     label1.grid(row=0, column=0)
     label2.grid(row=1, column=0)
     label3.grid(row=2, column=0)
-    update_num_of_player()
+    get_game()
 
 
 def change_user_name():
@@ -125,8 +126,12 @@ def change_user_name():
     input_field.insert(0, USER_NAME)
     button.grid(row=2, column=1, pady=20)
 
-
 def clear_widgets():
+    list = window.grid_slaves()
+    for l in list:
+        l.destroy()
+
+def clear_widgets2():
     """ Clears all the widgets from the screen """
     global label1
     global label2
@@ -171,7 +176,13 @@ def update_name():
         print(USER_NAME)
 
 
-def update_num_of_player(player_type="user"):
+def get_game():
+    my_socket.send("get_game".encode())
+    game = pickle.loads(my_socket.recv(2048))
+    return game
+
+
+def update_num_of_player(game):
     """ updates the number of player that are connected to our game """
     global game_status
     global players_num
@@ -179,9 +190,10 @@ def update_num_of_player(player_type="user"):
     global button
 
     if game_status == "in game":
-        my_socket.send("get_players_num".encode())
-        data = (my_socket.recv(1024).decode()).split('|')
-        players_num = data[1]
+        #my_socket.send("get_players_num".encode())
+        #data = (my_socket.recv(1024).decode()).split('|')
+        #players_num = data[1]
+        players_num = game.get_players_num()
         text = f"{players_num}/4 players are connected"
         label2.config(text=text)
         label2.after(500, update_num_of_player)
@@ -248,7 +260,10 @@ input_field.insert(0, USER_NAME)
 button.grid(row=2, column=1, pady=20)
 
 # Starting window
-window.mainloop()
+try:
+    window.mainloop()
+except Exception as e:
+    print(e)
 print("Game ended")
 my_socket.send("Quit".encode())
 my_socket.close()

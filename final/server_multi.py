@@ -1,6 +1,7 @@
 import socket
 import select
 from game_basic import *
+import pickle
 import threading
 import random
 
@@ -15,7 +16,7 @@ def create_room(client_conn, private=False):
     # If game room is available
     if game_id not in games.keys():
         games[game_id] = Game(game_id, private)
-        games[game_id].add_player(client_conn, "master")
+        games[game_id].add_player(client_conn)
         print(client_conn.getpeername(), "- Created room", game_id)
         client_conn.send(f"You created a new room|{game_id}".encode())
     # If room is not available try again
@@ -59,7 +60,7 @@ def join_random_room(client_conn):
 def player_in_room(client_conn):
     """
     gets a client and returns the game_id that the client is connected to
-    returns None if client is not connected
+    returns "None" if client is not connected
     """
     # Going through all the games
     for game_id in games.keys():
@@ -71,48 +72,27 @@ def player_in_room(client_conn):
 
 # Checks if player is connected to a game and disconnects him
 def remove_double_games(client_conn):
-    temp_key = player_in_room(client_conn)
+    game_num = player_in_room(client_conn)
 
-    if temp_key:
-        games[temp_key].remove_player(client_conn)
+    if game_num:
+        games[game_num].remove_player(client_conn)
 
         # If the room is empty
-        if games[temp_key].get_players_num() == 0:
-            games.pop(temp_key)
-            print("Closed room:", temp_key)
+        if games[game_num].get_players_num() == 0:
+            games.pop(game_num)
+            print("Closed room:", game_num)
 
 
-def remove_empty_rooms():
-    # Going through all the games
-    for game_id in games.keys():
-        if games[game_id].get_players_num() == 0:
-            games.pop(game_id)
-            print("Closed room:", game_id)
-
-
-# Server variables
-SERVER_IP = "192.168.1.106"
-SERVER_PORT = 4457
-MAX_MSG_LENGTH = 1024
-
-# Variables
-send_message = ""  # The massage we want to send to the client
-rec_data = ""  # The massage we receive from the client
-client_sockets = []  # List of all the clients that are connected to our server
-waiting_list = []  # List of players
-games = {}
-
-
-def handle_logout(current_socket, temp_key):
+def handle_logout(current_socket, game_num):
     """ handles the logout of a client """
     # If player is connected to a game
-    if temp_key:
-        games[temp_key].remove_player(current_socket)
+    if game_num:
+        games[game_num].remove_player(current_socket)
 
         # If the room is empty
-        if games[temp_key].get_players_num() == 0:
-            games.pop(temp_key)
-            print("Closed room:", temp_key)
+        if games[game_num].get_players_num() == 0:
+            games.pop(game_num)
+            print("Closed room:", game_num)
 
     print("Disconnect client -", current_socket.getpeername())
     client_sockets.remove(current_socket)
@@ -131,8 +111,14 @@ def create_server():
     return server_socket
 
 
-def handle_client_room_msgs(current_socket, data, temp_key):
-    """ handles all the data that is received from the player """
+def handle_connections_msg(current_socket, data, game_num):
+    """ handles all the data that is received from the player when he isn't connected to a room """
+
+    # If client want to disconnect
+    if data[0] == "Quit":
+        handle_logout(current_socket, game_num)
+        return
+
     if data[0] == "new":
         create_room(current_socket, private=False)
         return
@@ -145,38 +131,38 @@ def handle_client_room_msgs(current_socket, data, temp_key):
         join_random_room(current_socket)
         return
 
-    elif data[0] == "get_players_num" and temp_key:
-        snd_message = "Num of players|" + str(games[temp_key].get_players_num())
+
+def handle_client_game_msgs(current_socket, data, game_num):
+    """ handles all the player actions in the game """
+    if data[0] == "get_players_num" and game_num:
+        snd_message = "Num of players|" + str(games[game_num].get_players_num())
         current_socket.send(snd_message.encode())
         return
 
-
-def handle_client_game_msgs(current_socket, rec_data, temp_key):
-    """ handles all the player actions in the game """
+    if data[0] == "get_game":
+        current_socket.sendall(pickle.dumps(games[game_num]))
     pass
 
 
 def connected_client_server_handle(current_socket):
     try:  # If the client has been disconnected an error will pop
         data = (current_socket.recv(MAX_MSG_LENGTH).decode()).split('|')
-        temp_key = player_in_room(current_socket)  # game_id the player is connected to (False if none)
+        game_num = player_in_room(current_socket)  # game_id the player is connected to (False if none)
 
-        # If client want to disconnect
-        if data[0] == "Quit":
-            print("Disconnect client -", current_socket.getpeername())
-            handle_logout(current_socket, temp_key)
-            return
+        # If the player is already in a room
+        if game_num:
+            handle_client_game_msgs(current_socket, data, game_num)
 
-        # Client sent real massage
         else:
-            handle_client_room_msgs(current_socket, data, temp_key)
+            handle_connections_msg(current_socket, data, game_num)
+
 
     # Client has probably suddenly disconnected
     except Exception as e:
-        print(e, ": because thread didn't close when socket is")
-        temp_key = player_in_room(
+        print(e)
+        game_num = player_in_room(
             current_socket)  # The game_id which the player is connected to (False if none)
-        handle_logout(current_socket, temp_key)
+        handle_logout(current_socket, game_num)
 
 
 def main(server_socket):
@@ -194,8 +180,22 @@ def main(server_socket):
 
             # So it is an already connected client that has sent a massage
             else:
-                thread = threading.Thread(target=connected_client_server_handle, args=(current_socket,))
-                thread.start()
+                #thread = threading.Thread(target=connected_client_server_handle, args=(current_socket,))
+                #thread.start()
+                connected_client_server_handle(current_socket)
+
+
+# Server variables
+SERVER_IP = "0.0.0.0"
+SERVER_PORT = 4457
+MAX_MSG_LENGTH = 1024
+
+# Variables
+send_message = ""  # The massage we want to send to the client
+rec_data = ""  # The massage we receive from the client
+client_sockets = []  # List of all the clients that are connected to our server
+waiting_list = []  # List of players
+games = {}
 
 
 socket = create_server()
