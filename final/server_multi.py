@@ -113,33 +113,37 @@ def create_server():
 
 def handle_connections_msg(current_socket, data, game_num):
     """ handles all the data that is received from the player when he isn't connected to a room """
+    action = data[1]
+    game_id = data[2]
 
     # If client want to disconnect
-    if data[0] == "Quit":
+    if action == "Quit":
         handle_logout(current_socket, game_num)
         return
 
-    if data[0] == "new":
+    if action == "new":
         create_room(current_socket, private=False)
         return
 
-    elif data[0] == "join":
-        join_private_room(current_socket, game_id=data[1])
+    elif action == "join":
+        join_private_room(current_socket, game_id=game_id)
         return
 
-    elif data[0] == "random":
+    elif action == "random":
         join_random_room(current_socket)
         return
 
 
 def handle_client_game_msgs(current_socket, data, game_num):
     """ handles all the player actions in the game """
-    if data[0] == "get_players_num" and game_num:
+    action = data[1]
+
+    if action == "get_players_num" and game_num:
         snd_message = "Num of players|" + str(games[game_num].get_players_num())
         current_socket.send(snd_message.encode())
         return
 
-    if data[0] == "get_game":
+    if action == "get_game":
         current_socket.sendall(pickle.dumps(games[game_num]))
     pass
 
@@ -148,12 +152,14 @@ def connected_client_server_handle(current_socket):
     try:  # If the client has been disconnected an error will pop
         data = (current_socket.recv(MAX_MSG_LENGTH).decode()).split('|')
         game_num = player_in_room(current_socket)  # game_id the player is connected to (False if none)
+        data_type = data[0]
 
-        # If the player is already in a room
-        if game_num:
+        # If player has send a "connection" type request
+        if data_type == "action":
             handle_client_game_msgs(current_socket, data, game_num)
 
-        else:
+        # If player has send a "action" type request
+        elif data_type == "connect":
             handle_connections_msg(current_socket, data, game_num)
 
 
