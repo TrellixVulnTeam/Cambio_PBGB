@@ -1,8 +1,7 @@
 import socket
 import select
-from game_basic import *
+from final.Cambio_pack.game_basic import *
 import pickle
-import threading
 import random
 
 
@@ -39,7 +38,7 @@ def join_private_room(client_conn, name, game_id='0'):
         client_conn.send("No such room available|Error".encode())
         return
 
-    client_conn.send("No rooms available|Error".encode())
+
 
 
 def join_random_room(client_conn, name):

@@ -1,4 +1,4 @@
-from Card import Card
+from final.Cambio_pack.Card import Card
 import pygame
 
 # Setting up the game window

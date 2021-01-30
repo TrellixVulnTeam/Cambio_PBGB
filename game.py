@@ -1,5 +1,5 @@
-from Deck import Deck
-from Hand import Hand
+from final.Cambio_pack.Deck import Deck
+from final.Cambio_pack.Hand import Hand
 
 """
 The Class that contains all the information of the current game in the server
