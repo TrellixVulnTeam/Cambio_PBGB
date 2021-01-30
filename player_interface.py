@@ -171,7 +171,7 @@ def update_name():
     global saved_data
     if input_field.get():
         USER_NAME = str(input_field.get())
-        saved_data = open("saved_data.txt", "w")
+        saved_data = open("final/saved_data.txt", "w")
         saved_data.write(USER_NAME)
         print(USER_NAME)
 
@@ -217,11 +217,11 @@ game_status = "change name"
 
 # Checks if there is a text file with the name, if not create one
 try:
-    saved_data = open("saved_data.txt", "r")
+    saved_data = open("final/saved_data.txt", "r")
     USER_NAME = saved_data.read()
 except:
     USER_NAME = "user"
-    saved_data = open("saved_data.txt", "w")
+    saved_data = open("final/saved_data.txt", "w")
     saved_data.write(USER_NAME)
 
 # Window settings

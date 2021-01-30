@@ -6,7 +6,7 @@ import threading
 import random
 
 
-def create_room(client_conn, private=False):
+def create_room(client_conn, name, private=False):
     """ Called when the client asks to open a private room"""
     global games
     remove_double_games(client_conn)
@@ -16,21 +16,21 @@ def create_room(client_conn, private=False):
     # If game room is available
     if game_id not in games.keys():
         games[game_id] = Game(game_id, private)
-        games[game_id].add_player(client_conn)
+        games[game_id].add_player(client_conn, name)
         print(client_conn.getpeername(), "- Created room", game_id)
         client_conn.send(f"You created a new room|{game_id}".encode())
     # If room is not available try again
     else:
-        create_room(client_conn, private)
+        create_room(client_conn, name, private)
 
 
-def join_private_room(client_conn, game_id='0'):
+def join_private_room(client_conn, name, game_id='0'):
     """ Called when the client asks to connect to a private room"""
     global games
     remove_double_games(client_conn)
 
     if game_id in games.keys() and games[game_id].get_players_num() < 4:
-        games[game_id].add_player(client_conn)
+        games[game_id].add_player(client_conn, name)
         print(client_conn.getpeername(), f"- Joined room", game_id)
         client_conn.send(f"You joined room|{game_id}".encode())
         return
@@ -42,7 +42,7 @@ def join_private_room(client_conn, game_id='0'):
     client_conn.send("No rooms available|Error".encode())
 
 
-def join_random_room(client_conn):
+def join_random_room(client_conn, name):
     """ Called when the client asks to connect to any room available"""
     remove_double_games(client_conn)
 
@@ -50,7 +50,7 @@ def join_random_room(client_conn):
     for temp_id in games.keys():
         # If room is available
         if not games[temp_id].is_private() and games[temp_id].get_players_num() < 4:
-            games[temp_id].add_player(client_conn)
+            games[temp_id].add_player(client_conn, name)
             print(client_conn.getpeername(), "- Joined room", temp_id)
             client_conn.send(f"You joined room|{temp_id}".encode())
             return
@@ -122,15 +122,15 @@ def handle_connections_msg(current_socket, data, game_num):
         return
 
     if action == "new":
-        create_room(current_socket, private=False)
+        create_room(current_socket, name=data[2], private=False)
         return
 
     elif action == "join":
-        join_private_room(current_socket, game_id=game_id)
+        join_private_room(current_socket, name=data[3], game_id=game_id)
         return
 
     elif action == "random":
-        join_random_room(current_socket)
+        join_random_room(current_socket, name=data[2])
         return
 
 
