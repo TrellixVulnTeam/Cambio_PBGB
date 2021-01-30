@@ -37,7 +37,8 @@ def in_game_menu():
         clear_widgets()
         # Show text
         code_txt = Label(window, text="Game code: " + game.get_id())
-        players_txt = Label(window, text=f"{game.get_players_num()}/4 players are connected\n Waiting for admin to start")
+        players_txt = Label(window,
+                            text=f"{game.get_players_num()}/4 players are connected\n Waiting for admin to start")
 
         code_txt.grid(row=0, column=0)
         players_txt.grid(row=1, column=0)
@@ -48,7 +49,6 @@ def in_game_menu():
             button = Button(text="Start game!", width=10, height=1, bg="black", fg="white", command=start_game)
             button.grid(row=2, column=1, pady=20)
         print(game.names)
-
 
 
 def refresh_menu():
@@ -76,7 +76,6 @@ def create_new_room():
     game = get_game()
 
 
-
 def join_private_menu():
     global game_status
     clear_widgets()
@@ -90,6 +89,7 @@ def join_private_menu():
     game_code_text.grid(row=0, column=0)
     input_field.grid(row=0, column=1)
     button.grid(row=2, column=1, pady=20)
+
 
 def join_private_room(input_field):
     global game_status
@@ -108,6 +108,7 @@ def join_private_room(input_field):
         game = get_game()
     else:
         game_status = "not in game"
+
 
 def join_random_menu():
     """ asks the server to connect to any room available """
@@ -137,7 +138,8 @@ def change_user_name_menu():
 
     user_text = Label(window, text="User Name:")
     input_field = Entry(window)
-    button = Button(window, text="Update Name", width=10, height=1, bg="black", fg="white", command= lambda: update_name(input_field))
+    button = Button(window, text="Update Name", width=10, height=1, bg="black", fg="white",
+                    command=lambda: update_name(input_field))
 
     user_text.grid(row=0, column=0)
     input_field.grid(row=0, column=1)
@@ -152,6 +154,7 @@ def update_name(input_field):
         saved_data = open("saved_data.txt", "w")
         saved_data.write(USER_NAME)
         print(USER_NAME)
+
 
 # Variables
 game_status = "Starting"
@@ -181,7 +184,6 @@ menu_game.add_command(label="Change user name", command=change_user_name_menu)
 menu_game.add_command(label="Quit game", command=window.quit)
 my_menu.add_cascade(label="Game", menu=menu_game)
 
-
 # Checks if there is a text file with the name, if not create one
 try:
     saved_data = open("saved_data.txt", "r")
@@ -190,7 +192,6 @@ except:
     USER_NAME = "user"
     saved_data = open("saved_data.txt", "w")
     saved_data.write(USER_NAME)
-
 
 change_user_name_menu()
 refresh_menu()
